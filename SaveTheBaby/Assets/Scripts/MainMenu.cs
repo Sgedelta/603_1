@@ -1,8 +1,13 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class MainMenu : MonoBehaviour
 {
+
+    [SerializeField] private Button controlButton;
+    [SerializeField] private Button controlBackButton;
+
     public void StartGame()
     {
         SceneManager.LoadScene(1);
@@ -16,6 +21,14 @@ public class MainMenu : MonoBehaviour
     public void ToggleControls(GameObject _controlsPanel)
     {
         _controlsPanel.SetActive(!_controlsPanel.activeSelf);
+        if (_controlsPanel.activeSelf)
+        {
+            controlBackButton.Select();
+        }
+        else
+        {
+            controlButton.Select();
+        }
     }
 
     public void HoverEnter(RectTransform _transform)
