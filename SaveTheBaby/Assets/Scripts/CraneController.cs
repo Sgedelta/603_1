@@ -8,9 +8,16 @@ public class CraneController : MonoBehaviour
     InputAction interactAction;
 
     [SerializeField]
+    GameObject pivotObject;
+    Rigidbody2D pivotRigidbody;
+
+    [SerializeField]
     GameObject magnetObject;
     SpriteRenderer magnetSprite;
     Rigidbody2D magnetRigidbody;
+
+    [SerializeField]
+    CraneRope firstRope;
 
     public float moveSpeed;
     public float attractAcceleration;
@@ -18,6 +25,7 @@ public class CraneController : MonoBehaviour
     int obstacleLayerMask;
     bool magnetActive = false;
     List<Rigidbody2D> attractedObstacles = new();
+    List<CraneRope> ropes = new();
 
     private void Start()
     {
@@ -26,7 +34,9 @@ public class CraneController : MonoBehaviour
         interactAction = InputSystem.actions.FindAction("Interact");
         magnetSprite = magnetObject.GetComponent<SpriteRenderer>();
         magnetRigidbody = magnetObject.GetComponent<Rigidbody2D>();
+        pivotRigidbody = pivotObject.GetComponent<Rigidbody2D>();
         obstacleLayerMask = LayerMask.GetMask("Obstacle");
+        ropes.Add(firstRope);
     }
 
     // Update is called once per frame
@@ -42,14 +52,15 @@ public class CraneController : MonoBehaviour
     private void FixedUpdate()
     {
         Vector2 moveValue = moveAction.ReadValue<Vector2>();
-        
+
 
         Attract();
-        //Vector2 currentPosition = new Vector2(magnetRigidbody.transform.position.x, magnetRigidbody.transform.position.y);
+        Vector2 currentPosition = new Vector2(pivotRigidbody.transform.position.x, pivotRigidbody.transform.position.y);
         Vector2 deltaPosition = moveValue * moveSpeed * Time.deltaTime;
-        //magnetRigidbody.MovePosition(currentPosition + deltaPosition);
-        magnetRigidbody.linearVelocity = moveValue * moveSpeed;
-        //transform.position = currentPosition + deltaPosition;
+        Vector2 deltaHorizontal = new Vector2(deltaPosition.x, 0);
+        float deltaVertical = deltaPosition.y;
+        pivotRigidbody.MovePosition(currentPosition + deltaHorizontal);
+        ropes[0].Extend(-deltaVertical);
 
     }
 
@@ -75,6 +86,7 @@ public class CraneController : MonoBehaviour
             {
                 Vector2 direction = (magnetRigidbody.transform.position - rigid.transform.position).normalized;
                 rigid.AddForce(direction * rigid.mass * attractAcceleration);
+                magnetRigidbody.AddForce(-direction * rigid.mass * attractAcceleration);
             }
         }
     }
