@@ -94,7 +94,7 @@ public class CraneController : MonoBehaviour
     public void OnTriggerEnter2D(Collider2D collision)
     {
         var rigid = collision.gameObject.GetComponent<Rigidbody2D>();
-        if (rigid != null)
+        if (rigid != null && rigid.gameObject.GetComponent<Magnetic>() != null)
         {
             attractedObstacles.Add(rigid);
         }
