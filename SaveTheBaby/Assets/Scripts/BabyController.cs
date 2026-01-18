@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 
 public class BabyController : MonoBehaviour
@@ -72,7 +73,10 @@ public class BabyController : MonoBehaviour
         if (goalOverlap.Length > 0)
         {
             lastGoalHit = goalOverlap[0].gameObject;
-            Debug.Log(goalOverlap[0].gameObject.name);
+            if(lastGoalHit.GetComponent<Goal>() != null)
+            {
+                lastGoalHit.GetComponent<Goal>().UpdateCameraPosition();
+            }
         }
     }
 
@@ -81,6 +85,8 @@ public class BabyController : MonoBehaviour
     {
         Debug.Log("Baby Died!");
         Destroy(gameObject);
+        SceneManager.LoadScene(1); //for now just reload the scene...
+
     }
 
     private void OnDrawGizmos()

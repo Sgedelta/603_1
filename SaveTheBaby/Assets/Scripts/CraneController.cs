@@ -20,6 +20,7 @@ public class CraneController : MonoBehaviour
     CraneRope firstRope;
 
     public float moveSpeed;
+    public float extendSpeed = 5;
     public float attractAcceleration;
 
     int obstacleLayerMask;
@@ -56,9 +57,9 @@ public class CraneController : MonoBehaviour
 
         Attract();
         Vector2 currentPosition = new Vector2(pivotRigidbody.transform.position.x, pivotRigidbody.transform.position.y);
-        Vector2 deltaPosition = moveValue * moveSpeed * Time.deltaTime;
-        Vector2 deltaHorizontal = new Vector2(deltaPosition.x, 0);
-        float deltaVertical = deltaPosition.y;
+        Vector2 deltaPosition = moveValue * Time.deltaTime;
+        Vector2 deltaHorizontal = new Vector2(deltaPosition.x * moveSpeed, 0);
+        float deltaVertical = deltaPosition.y * extendSpeed;
         pivotRigidbody.MovePosition(currentPosition + deltaHorizontal);
         ropes[0].Extend(-deltaVertical);
 
