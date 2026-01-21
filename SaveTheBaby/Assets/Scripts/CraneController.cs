@@ -6,6 +6,7 @@ public class CraneController : MonoBehaviour
 {
     InputAction moveAction;
     InputAction interactAction;
+    InputAction raiseLowerAction;
 
     [SerializeField]
     GameObject pivotObject;
@@ -33,6 +34,7 @@ public class CraneController : MonoBehaviour
         // 3. Find the references to the "Move" and "Jump" actions
         moveAction = InputSystem.actions.FindAction("Move");
         interactAction = InputSystem.actions.FindAction("Interact");
+        raiseLowerAction = InputSystem.actions.FindAction("Rope");
         magnetSprite = magnetObject.GetComponent<SpriteRenderer>();
         magnetRigidbody = magnetObject.GetComponent<Rigidbody2D>();
         pivotRigidbody = pivotObject.GetComponent<Rigidbody2D>();
@@ -53,14 +55,14 @@ public class CraneController : MonoBehaviour
     private void FixedUpdate()
     {
         Vector2 moveValue = moveAction.ReadValue<Vector2>();
+        float raiseValue = raiseLowerAction.ReadValue<float>();
 
 
         Attract();
         Vector2 currentPosition = new Vector2(pivotRigidbody.transform.position.x, pivotRigidbody.transform.position.y);
-        Vector2 deltaPosition = moveValue * Time.deltaTime;
-        Vector2 deltaHorizontal = new Vector2(deltaPosition.x * moveSpeed, 0);
-        float deltaVertical = deltaPosition.y * extendSpeed;
-        pivotRigidbody.MovePosition(currentPosition + deltaHorizontal);
+        Vector2 deltaPosition = moveValue * Time.deltaTime * moveSpeed;
+        float deltaVertical = raiseValue * Time.deltaTime * extendSpeed;
+        pivotRigidbody.MovePosition(currentPosition + deltaPosition);
         ropes[0].Extend(-deltaVertical);
 
     }
