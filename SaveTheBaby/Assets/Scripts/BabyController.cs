@@ -73,10 +73,7 @@ public class BabyController : MonoBehaviour
         if (goalOverlap.Length > 0)
         {
             lastGoalHit = goalOverlap[0].gameObject;
-            if(lastGoalHit.GetComponent<Goal>() != null)
-            {
-                lastGoalHit.GetComponent<Goal>().UpdateCameraPosition();
-            }
+            
         }
     }
 
