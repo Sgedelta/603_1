@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
@@ -9,6 +12,7 @@ public class BabyController : MonoBehaviour
     [SerializeField] private Vector2 groundedSize = new Vector2(1f, 0.2f);
     [SerializeField] private Vector2 deathSize = new Vector2(1.1f, 1.1f);
     [SerializeField] private Vector2 goalSize = new Vector2(1.2f, 1.2f);
+    [SerializeField] private Vector2 electricDeathSize = new Vector2(1, 1);
     private int groundLayerMask;
     private int goalLayerMask;
     private bool grounded = false;
@@ -58,11 +62,15 @@ public class BabyController : MonoBehaviour
 
     private void CheckDeathCollision()
     {
-        Collider2D[] sidesAndTopOverlaps = Physics2D.OverlapBoxAll(
+        List<Collider2D> deathOverlaps = Physics2D.OverlapBoxAll(
             new Vector2(transform.position.x, transform.position.y + ((deathSize.y - 1) / 2) + 0.3f), 
-            deathSize, 0, groundLayerMask);
+            deathSize, 0, groundLayerMask).ToList<Collider2D>();
 
-        hitSomething = sidesAndTopOverlaps.Length > 0;
+        deathOverlaps.AddRange(from obj in Physics2D.OverlapBoxAll(transform.position, electricDeathSize, 0) 
+                               where (obj.GetComponent<Magnetic>() != null && obj.GetComponent<Magnetic>().IsElectric) select obj);
+
+
+        hitSomething = deathOverlaps.Count > 0;
     }
 
     private void CheckGoalCollision()
@@ -93,6 +101,7 @@ public class BabyController : MonoBehaviour
 
         Gizmos.color = Color.red;
         Gizmos.DrawWireCube(new Vector3(transform.position.x, transform.position.y + ((deathSize.y - 1) / 2) + 0.3f), deathSize);
+        Gizmos.DrawWireCube(transform.position, electricDeathSize);
 
         Gizmos.color = Color.green;
         Gizmos.DrawWireCube(transform.position, goalSize);
