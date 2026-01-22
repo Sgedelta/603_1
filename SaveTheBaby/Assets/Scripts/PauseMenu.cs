@@ -1,19 +1,18 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using UnityEngine.InputSystem;
 
-public class MainMenu : MonoBehaviour
+public class PauseMenu : MonoBehaviour
 {
-
+    InputAction pauseAction;
+    [SerializeField] GameObject _pauseMenuUI;
     [SerializeField] private Button controlButton;
     [SerializeField] private Button controlBackButton;
 
-    /// <summary>
-    /// Loads the 1st scene in the build
-    /// </summary>
-    public void StartGame()
+    private void Start()
     {
-        SceneManager.LoadScene(1);
+        pauseAction = InputSystem.actions.FindAction("Pause");
+        pauseAction.performed += ctx => Pause();
     }
     /// <summary>
     /// Closes the game both in editor and in build
@@ -25,6 +24,7 @@ public class MainMenu : MonoBehaviour
         UnityEditor.EditorApplication.isPlaying = false;
 #endif 
     }
+
     /// <summary>
     /// Opens the controls menu
     /// </summary>
@@ -58,5 +58,32 @@ public class MainMenu : MonoBehaviour
     public void HoverExit(RectTransform _transform)
     {
         _transform.localScale = _transform.localScale / 2;
+    }
+
+    /// <summary>
+    /// Pauses the game when called and sets pause menu as active
+    /// </summary>
+    /// <param name="_pauseMenu">Empty parent game object that has the pause menu</param>
+    public void Pause()
+    {
+        if (_pauseMenuUI.activeSelf) 
+        {
+            Resume();
+        }
+        else
+        {
+            Time.timeScale = 0f;
+            _pauseMenuUI.SetActive(true);
+        }
+    }
+
+    /// <summary>
+    /// Resumes the game when called and sets pause menu as unactive
+    /// </summary>
+    /// <param name="_pauseMenu">Empty parent game object that has the pause menu</param>
+    public void Resume()
+    {
+        Time.timeScale = 1.0f;
+        _pauseMenuUI.SetActive(false);
     }
 }
