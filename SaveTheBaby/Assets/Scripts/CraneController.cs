@@ -34,6 +34,7 @@ public class CraneController : MonoBehaviour
     public float attractAcceleration;
 
     int obstacleLayerMask;
+    int noCraneAreaLayerMask;
     bool magnetActive = false;
     List<Rigidbody2D> attractedObstacles = new();
     List<CraneRope> ropes = new();
@@ -56,6 +57,7 @@ public class CraneController : MonoBehaviour
         pivotRigidbody = pivotObject.GetComponent<Rigidbody2D>();
         pivotHinge = pivotObject.GetComponent<HingeJoint2D>();
         obstacleLayerMask = LayerMask.GetMask("Obstacle");
+        noCraneAreaLayerMask = LayerMask.GetMask("No Crane Area");
         UpdateRopes();
 
         float totalLength = firstRope.length;
@@ -122,7 +124,11 @@ public class CraneController : MonoBehaviour
         Vector2 deltaPosition = moveValue * Time.deltaTime * moveSpeed;
         float ropeExtend = ropeExtendValue * Time.deltaTime * extendSpeed;
 
-        pivotRigidbody.MovePosition(currentPosition + deltaPosition);
+        var hit = Physics2D.Linecast(currentPosition, currentPosition + deltaPosition, noCraneAreaLayerMask);
+        if (hit)
+            pivotRigidbody.MovePosition(hit.point + hit.normal * 0.01f);
+        else
+            pivotRigidbody.MovePosition(currentPosition + deltaPosition);
 
         float currentTotalLength = 0;
         foreach (CraneRope rope in ropes)

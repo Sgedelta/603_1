@@ -136,6 +136,8 @@ public class CraneRope : MonoBehaviour
         Destroy(gameObject);
     }
 
+
+
     private void OnCollisionEnter2D(Collision2D collision)
     {
         List<ContactPoint2D> contactPoints = new();
