@@ -4,6 +4,14 @@ using UnityEngine.InputSystem;
 
 public class CraneController : MonoBehaviour
 {
+    public static CraneController instance;
+
+    private void Awake()
+    {
+        if (instance != null) Destroy(gameObject);
+        else instance = this;
+    }
+
     InputAction moveAction;
     InputAction interactAction;
 
@@ -19,7 +27,7 @@ public class CraneController : MonoBehaviour
     [SerializeField]
     CraneRope firstRope;
 
-    public float moveSpeed;
+    public Vector2 moveSpeed;
     public float extendSpeed = 5;
     public float attractAcceleration;
 
@@ -28,16 +36,33 @@ public class CraneController : MonoBehaviour
     List<Rigidbody2D> attractedObstacles = new();
     List<CraneRope> ropes = new();
 
+    public int initialSegments = 1;
+    public float maxSplitRate;
+    float splitCooldown;
+
     private void Start()
     {
         // 3. Find the references to the "Move" and "Jump" actions
         moveAction = InputSystem.actions.FindAction("Move");
         interactAction = InputSystem.actions.FindAction("Interact");
-        magnetSprite = magnetObject.GetComponent<SpriteRenderer>();
+        magnetSprite = magnetObject.transform.GetChild(0).GetComponent<SpriteRenderer>();
         magnetRigidbody = magnetObject.GetComponent<Rigidbody2D>();
         pivotRigidbody = pivotObject.GetComponent<Rigidbody2D>();
         obstacleLayerMask = LayerMask.GetMask("Obstacle");
-        ropes.Add(firstRope);
+        RegisterRope(firstRope);
+
+        float totalLength = firstRope.length;
+        float segmentLength = totalLength / initialSegments;
+        Vector2 totalVector = (magnetObject.transform.position - firstRope.transform.position).normalized * totalLength;
+        for (int i = 1; i < initialSegments; i++)
+        {
+            ropes[^1].Split((Vector2)firstRope.transform.position + totalVector * i / initialSegments);
+        }
+    }
+
+    public void RegisterRope(CraneRope newRope)
+    {
+        ropes.Add(newRope);
     }
 
     // Update is called once per frame
@@ -48,20 +73,47 @@ public class CraneController : MonoBehaviour
             Toggle();
         }
 
+        if (splitCooldown > 0)
+        {
+            splitCooldown -= Time.deltaTime;
+            if (splitCooldown < 0) splitCooldown = 0;
+        }
+
+    }
+    public bool ReadyToSplit() => splitCooldown <= 0;
+    public void RefreshCooldown()
+    {
+        splitCooldown = 0; return;
+        if (maxSplitRate == 0)
+        {
+            splitCooldown = -1; return;
+        }
+        splitCooldown = 1 / maxSplitRate;
     }
 
     private void FixedUpdate()
     {
         Vector2 moveValue = moveAction.ReadValue<Vector2>();
 
+        //TODO: Input change
+        float ropeExtendValue = 0;
+        if (Input.GetKey(KeyCode.R)) ropeExtendValue = 1;
+        if (Input.GetKey(KeyCode.F)) ropeExtendValue = -1;
+
 
         Attract();
         Vector2 currentPosition = new Vector2(pivotRigidbody.transform.position.x, pivotRigidbody.transform.position.y);
-        Vector2 deltaPosition = moveValue * Time.deltaTime;
-        Vector2 deltaHorizontal = new Vector2(deltaPosition.x * moveSpeed, 0);
-        float deltaVertical = deltaPosition.y * extendSpeed;
-        pivotRigidbody.MovePosition(currentPosition + deltaHorizontal);
-        ropes[0].Extend(-deltaVertical);
+        Vector2 deltaPosition = moveValue * Time.deltaTime * moveSpeed;
+        float ropeExtend = ropeExtendValue * Time.deltaTime * extendSpeed;
+        //Vector2 deltaHorizontal = new Vector2(deltaPosition.x * moveSpeed, 0);
+        //float deltaVertical = deltaPosition.y * extendSpeed;
+        pivotRigidbody.MovePosition(currentPosition + deltaPosition);
+
+        foreach (CraneRope rope in ropes)
+        {
+            rope.Extend(-ropeExtend / ropes.Count);
+        }
+        //ropes[0].Extend(-ropeExtend);
 
     }
 
