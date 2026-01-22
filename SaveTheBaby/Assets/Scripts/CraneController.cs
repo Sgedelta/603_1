@@ -88,6 +88,7 @@ public class CraneController : MonoBehaviour
             foreach (var rigid in attractedObstacles)
             {
                 Vector2 direction = (magnetRigidbody.transform.position - rigid.transform.position).normalized;
+                direction *= rigid.gameObject.GetComponent<Magnetic>().Repellent ? -1 : 1;
                 rigid.AddForce(direction * rigid.mass * attractAcceleration);
                 magnetRigidbody.AddForce(-direction * rigid.mass * attractAcceleration);
             }
