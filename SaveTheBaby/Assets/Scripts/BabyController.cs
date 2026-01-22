@@ -81,7 +81,7 @@ public class BabyController : MonoBehaviour
         if (goalOverlap.Length > 0)
         {
             lastGoalHit = goalOverlap[0].gameObject;
-            
+            lastGoalHit.GetComponent<Goal>().UpdateCheckpointPos();
         }
     }
 
