@@ -14,6 +14,7 @@ public class CraneController : MonoBehaviour
 
     InputAction moveAction;
     InputAction interactAction;
+    InputAction raiseLowerAction;
 
     [SerializeField]
     GameObject pivotObject;
@@ -49,6 +50,7 @@ public class CraneController : MonoBehaviour
         // 3. Find the references to the "Move" and "Jump" actions
         moveAction = InputSystem.actions.FindAction("Move");
         interactAction = InputSystem.actions.FindAction("Interact");
+        raiseLowerAction = InputSystem.actions.FindAction("Rope");
         magnetSprite = magnetObject.transform.GetChild(0).GetComponent<SpriteRenderer>();
         magnetRigidbody = magnetObject.GetComponent<Rigidbody2D>();
         pivotRigidbody = pivotObject.GetComponent<Rigidbody2D>();
@@ -107,6 +109,7 @@ public class CraneController : MonoBehaviour
     private void FixedUpdate()
     {
         Vector2 moveValue = moveAction.ReadValue<Vector2>();
+        float raiseValue = raiseLowerAction.ReadValue<float>();
 
         //TODO: Input change
         float ropeExtendValue = 0;
@@ -118,15 +121,9 @@ public class CraneController : MonoBehaviour
         Vector2 currentPosition = new Vector2(pivotRigidbody.transform.position.x, pivotRigidbody.transform.position.y);
         Vector2 deltaPosition = moveValue * Time.deltaTime * moveSpeed;
         float ropeExtend = ropeExtendValue * Time.deltaTime * extendSpeed;
-        //Vector2 deltaHorizontal = new Vector2(deltaPosition.x * moveSpeed, 0);
-        //float deltaVertical = deltaPosition.y * extendSpeed;
+
         pivotRigidbody.MovePosition(currentPosition + deltaPosition);
 
-        //uniform extend for every segment
-        //foreach (CraneRope rope in ropes)
-        //{
-        //    rope.Extend(-ropeExtend / ropes.Count);
-        //}
         float currentTotalLength = 0;
         foreach (CraneRope rope in ropes)
         {
@@ -134,8 +131,6 @@ public class CraneController : MonoBehaviour
         }
         if (currentTotalLength - ropeExtend >= minLength && currentTotalLength - ropeExtend <= maxLength)
             ropes[0].Extend(-ropeExtend);
-
-        //ropes[0].Extend(-ropeExtend);
 
     }
 
