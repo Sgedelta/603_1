@@ -20,7 +20,7 @@ public class CraneController : MonoBehaviour
     [SerializeField]
     CraneRope firstRope;
 
-    public float moveSpeed;
+    public Vector2 moveSpeed = new Vector2(5, 2);
     public float extendSpeed = 5;
     public float attractAcceleration;
 

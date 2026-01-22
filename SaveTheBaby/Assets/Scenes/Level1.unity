@@ -2976,6 +2976,14 @@ PrefabInstance:
       propertyPath: extendSpeed
       value: 5
       objectReference: {fileID: 0}
+    - target: {fileID: 4195428178059701490, guid: c526854898e94d84abba118f751e3caf, type: 3}
+      propertyPath: moveSpeed.x
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4195428178059701490, guid: c526854898e94d84abba118f751e3caf, type: 3}
+      propertyPath: moveSpeed.y
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6544838764403854730, guid: c526854898e94d84abba118f751e3caf, type: 3}
       propertyPath: m_LocalPosition.y
       value: -4.04
