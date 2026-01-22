@@ -228,7 +228,8 @@ MonoBehaviour:
   extendSpeed: 5
   attractAcceleration: 40
   initialSegments: 4
-  maxSplitRate: 1
+  minLength: 2
+  maxLength: 10
 --- !u!1 &4710056941698476616
 GameObject:
   m_ObjectHideFlags: 0

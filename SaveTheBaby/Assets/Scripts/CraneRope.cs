@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class CraneRope : MonoBehaviour
 {
+    public static readonly float MaxSegmentLength = 1.0f;
+
     public HingeJoint2D hinge;
     public HingeJoint2D parentHinge;
     public GameObject ropeVisual;
@@ -15,6 +17,7 @@ public class CraneRope : MonoBehaviour
     public GameObject ropePrefab;
     CraneRope parentRope;
     CraneRope childRope;
+    public CraneRope ChildRope => childRope;
 
     private void Awake()
     {
@@ -27,15 +30,28 @@ public class CraneRope : MonoBehaviour
 
     public void Extend(float deltaLength)
     {
-        if (deltaLength < -length) return;
-        if (childRope == null)
+        if (deltaLength < -length)
         {
-            SetLength(length + deltaLength);
+            Omit();
+            return;
+        }
+
+        if (length + deltaLength - MaxSegmentLength > 0.1f)
+        {
+            SplitAtLocalPosition(length + deltaLength - MaxSegmentLength);
         }
         else
         {
             SetLength(length + deltaLength);
-            //childRope.Extend(deltaLength);
+            //if (childRope == null)
+            //{
+            //    SetLength(length + deltaLength);
+            //}
+            //else
+            //{
+            //    SetLength(length + deltaLength);
+            //    //childRope.Extend(deltaLength);
+            //}
         }
     }
 
@@ -54,16 +70,26 @@ public class CraneRope : MonoBehaviour
 
     static int maxSplit = 100;
     static int splitted = 0;
-    public void Split(Vector2 splitPosition)
+    public void SplitAtLocalPosition(float localPosition)
+    {
+        float originalLength = length;
+        float t = localPosition / originalLength;
+        Split(originalLength, t);
+    }
+    public void SplitAtWorldPosition(Vector2 splitPosition)
     {
         if (splitted >= maxSplit) return;
         splitted = splitted + 1;
-        if (!CraneController.instance.ReadyToSplit()) return;
-        CraneController.instance.RefreshCooldown();
+        //if (!CraneController.instance.ReadyToSplit()) return;
+        //CraneController.instance.RefreshCooldown();
 
         Vector2 localOrigin = transform.position;
         float originalLength = length;
         float t = Vector3.Dot(splitPosition - localOrigin, transform.up) / originalLength;
+        Split(originalLength, t);
+    }
+    void Split(float originalLength, float t)
+    {
         if (t > 0 && t < 1)
         {
             Debug.Log("Split");
@@ -79,10 +105,35 @@ public class CraneRope : MonoBehaviour
 
             hinge.connectedBody = newRopeGO.GetComponent<Rigidbody2D>();
             newRope.hinge.connectedBody = childRigid;
+            newRope.childRope = childRope;
             childRope = newRope;
             newRope.parentRope = this;
-            CraneController.instance.RegisterRope(childRope);
+            CraneController.instance.UpdateRopes();
         }
+    }
+
+    public void Omit()
+    {
+        SetLength(0.0001f);
+        if (parentRope == null && childRope == null) return;
+        if (parentRope != null)
+        {
+            if (childRope != null)
+            {
+                parentRope.childRope = childRope;
+            }
+        }
+        if (childRope != null)
+        {
+            if (parentRope != null)
+            {
+                childRope.parentRope = parentRope;
+            }
+            childRope.parentHinge = parentHinge;
+        }
+        parentHinge.connectedBody = hinge.connectedBody;
+        CraneController.instance.UpdateRopes();
+        Destroy(gameObject);
     }
 
     private void OnCollisionEnter2D(Collision2D collision)

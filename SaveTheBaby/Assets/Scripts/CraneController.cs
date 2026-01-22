@@ -18,6 +18,7 @@ public class CraneController : MonoBehaviour
     [SerializeField]
     GameObject pivotObject;
     Rigidbody2D pivotRigidbody;
+    HingeJoint2D pivotHinge;
 
     [SerializeField]
     GameObject magnetObject;
@@ -37,8 +38,11 @@ public class CraneController : MonoBehaviour
     List<CraneRope> ropes = new();
 
     public int initialSegments = 1;
-    public float maxSplitRate;
+    float maxSplitRate;
     float splitCooldown;
+
+    public float minLength;
+    public float maxLength;
 
     private void Start()
     {
@@ -48,21 +52,29 @@ public class CraneController : MonoBehaviour
         magnetSprite = magnetObject.transform.GetChild(0).GetComponent<SpriteRenderer>();
         magnetRigidbody = magnetObject.GetComponent<Rigidbody2D>();
         pivotRigidbody = pivotObject.GetComponent<Rigidbody2D>();
+        pivotHinge = pivotObject.GetComponent<HingeJoint2D>();
         obstacleLayerMask = LayerMask.GetMask("Obstacle");
-        RegisterRope(firstRope);
+        UpdateRopes();
 
         float totalLength = firstRope.length;
         float segmentLength = totalLength / initialSegments;
         Vector2 totalVector = (magnetObject.transform.position - firstRope.transform.position).normalized * totalLength;
         for (int i = 1; i < initialSegments; i++)
         {
-            ropes[^1].Split((Vector2)firstRope.transform.position + totalVector * i / initialSegments);
+            ropes[^1].SplitAtWorldPosition((Vector2)firstRope.transform.position + totalVector * i / initialSegments);
         }
     }
 
-    public void RegisterRope(CraneRope newRope)
+    public void UpdateRopes()
     {
-        ropes.Add(newRope);
+        CraneRope firstRope = pivotHinge.connectedBody.GetComponent<CraneRope>();
+        ropes.Clear();
+        CraneRope lastRope = firstRope;
+        while (lastRope != null)
+        {
+            ropes.Add(lastRope);
+            lastRope = lastRope.ChildRope;
+        }
     }
 
     // Update is called once per frame
@@ -83,6 +95,7 @@ public class CraneController : MonoBehaviour
     public bool ReadyToSplit() => splitCooldown <= 0;
     public void RefreshCooldown()
     {
+        //For dynamic splits, not available now
         splitCooldown = 0; return;
         if (maxSplitRate == 0)
         {
@@ -109,10 +122,19 @@ public class CraneController : MonoBehaviour
         //float deltaVertical = deltaPosition.y * extendSpeed;
         pivotRigidbody.MovePosition(currentPosition + deltaPosition);
 
+        //uniform extend for every segment
+        //foreach (CraneRope rope in ropes)
+        //{
+        //    rope.Extend(-ropeExtend / ropes.Count);
+        //}
+        float currentTotalLength = 0;
         foreach (CraneRope rope in ropes)
         {
-            rope.Extend(-ropeExtend / ropes.Count);
+            currentTotalLength += rope.length;
         }
+        if (currentTotalLength - ropeExtend >= minLength && currentTotalLength - ropeExtend <= maxLength)
+            ropes[0].Extend(-ropeExtend);
+
         //ropes[0].Extend(-ropeExtend);
 
     }
