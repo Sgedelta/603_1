@@ -4,6 +4,15 @@ using UnityEngine.InputSystem;
 
 public class CraneController : MonoBehaviour
 {
+    public static CraneController instance;
+
+    private void Awake()
+    {
+        if (instance != null) Destroy(gameObject);
+        else instance = this;
+    }
+
+
     InputAction moveAction;
     InputAction interactAction;
     InputAction raiseLowerAction;
@@ -11,6 +20,7 @@ public class CraneController : MonoBehaviour
     [SerializeField]
     GameObject pivotObject;
     Rigidbody2D pivotRigidbody;
+    HingeJoint2D pivotHinge;
 
     [SerializeField]
     GameObject magnetObject;
@@ -25,9 +35,17 @@ public class CraneController : MonoBehaviour
     public float attractAcceleration;
 
     int obstacleLayerMask;
+    int noCraneAreaLayerMask;
     bool magnetActive = false;
     List<Rigidbody2D> attractedObstacles = new();
     List<CraneRope> ropes = new();
+
+    public int initialSegments = 1;
+    float maxSplitRate;
+    float splitCooldown;
+
+    public float minLength;
+    public float maxLength;
 
     private void Start()
     {
@@ -35,11 +53,34 @@ public class CraneController : MonoBehaviour
         moveAction = InputSystem.actions.FindAction("Move");
         interactAction = InputSystem.actions.FindAction("Interact");
         raiseLowerAction = InputSystem.actions.FindAction("Rope");
-        magnetSprite = magnetObject.GetComponent<SpriteRenderer>();
+        magnetSprite = magnetObject.transform.GetChild(0).GetComponent<SpriteRenderer>();
         magnetRigidbody = magnetObject.GetComponent<Rigidbody2D>();
         pivotRigidbody = pivotObject.GetComponent<Rigidbody2D>();
+        pivotHinge = pivotObject.GetComponent<HingeJoint2D>();
         obstacleLayerMask = LayerMask.GetMask("Obstacle");
-        ropes.Add(firstRope);
+        noCraneAreaLayerMask = LayerMask.GetMask("No Crane Area");
+        UpdateRopes();
+
+        float totalLength = firstRope.length;
+        float segmentLength = totalLength / initialSegments;
+        Vector2 totalVector = (magnetObject.transform.position - firstRope.transform.position).normalized * totalLength;
+        for (int i = 1; i < initialSegments; i++)
+        {
+            ropes[^1].SplitAtWorldPosition((Vector2)firstRope.transform.position + totalVector * i / initialSegments);
+        }
+    }
+
+
+    public void UpdateRopes()
+    {
+        CraneRope firstRope = pivotHinge.connectedBody.GetComponent<CraneRope>();
+        ropes.Clear();
+        CraneRope lastRope = firstRope;
+        while (lastRope != null)
+        {
+            ropes.Add(lastRope);
+            lastRope = lastRope.ChildRope;
+        }
     }
 
     // Update is called once per frame
@@ -90,7 +131,7 @@ public class CraneController : MonoBehaviour
                 Vector2 direction = (magnetRigidbody.transform.position - rigid.transform.position).normalized;
                 direction *= rigid.gameObject.GetComponent<Magnetic>().Repellent ? -1 : 1;
                 rigid.AddForce(direction * rigid.mass * attractAcceleration);
-                magnetRigidbody.AddForce(-direction * rigid.mass * attractAcceleration);
+                magnetRigidbody.AddForce(-direction * rigid.mass * attractAcceleration / (magnetRigidbody.transform.position - rigid.transform.position).sqrMagnitude);
             }
         }
     }
@@ -112,4 +153,5 @@ public class CraneController : MonoBehaviour
             attractedObstacles.Remove(rigid);
         }
     }
+
 }

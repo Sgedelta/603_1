@@ -13,6 +13,7 @@ public class BabyController : MonoBehaviour
     [SerializeField] private Vector2 deathSize = new Vector2(1.1f, 1.1f);
     [SerializeField] private Vector2 goalSize = new Vector2(1.2f, 1.2f);
     [SerializeField] private Vector2 electricDeathSize = new Vector2(1, 1);
+    [SerializeField] private float stepDetectWidth = .1f;
     private int groundLayerMask;
     private int goalLayerMask;
     private bool grounded = false;
@@ -33,6 +34,7 @@ public class BabyController : MonoBehaviour
     void Update()
     {
         CheckGrounded();
+        CheckStep();
         CheckDeathCollision();
         CheckGoalCollision();
 
@@ -53,22 +55,42 @@ public class BabyController : MonoBehaviour
     private void CheckGrounded()
     {
         Collider2D[] groundOverlaps = Physics2D.OverlapBoxAll(
-            new Vector2(transform.position.x, transform.position.y + footHeight), 
+            new Vector2(transform.position.x, transform.position.y + footHeight - groundedSize.y/2), 
             groundedSize, 0, groundLayerMask);
 
 
         grounded = groundOverlaps.Length > 0;
     }
 
+    private void CheckStep()
+    {
+        if(!grounded)
+        {
+            return;
+        }
+
+        Collider2D[] stepCollider = (from obj in Physics2D.OverlapBoxAll(
+            new Vector2(transform.position.x + groundedSize.x/2 * crawlDir, transform.position.y + footHeight + groundedSize.y / 2),
+            new Vector2(stepDetectWidth, groundedSize.y), 0, groundLayerMask
+            ) where !obj.isTrigger select obj).ToArray();
+
+        for (int i = 0; i < stepCollider.Length; i++)
+        {
+
+            transform.position += new Vector3(0, groundedSize.y, 0);
+        }
+    }
+
     private void CheckDeathCollision()
     {
-        List<Collider2D> deathOverlaps = Physics2D.OverlapBoxAll(
-            new Vector2(transform.position.x, transform.position.y + ((deathSize.y - 1) / 2) + 0.3f), 
-            deathSize, 0, groundLayerMask).ToList<Collider2D>();
+        List<Collider2D> deathOverlaps = (from obj in Physics2D.OverlapBoxAll(
+            new Vector2(transform.position.x, transform.position.y + ((deathSize.y - 1) / 2) + 0.3f),
+            deathSize, 0, groundLayerMask) where (!obj.isTrigger) select obj).ToList<Collider2D>();
 
         deathOverlaps.AddRange(from obj in Physics2D.OverlapBoxAll(transform.position, electricDeathSize, 0) 
                                where (obj.GetComponent<Magnetic>() != null && obj.GetComponent<Magnetic>().IsElectric) select obj);
 
+        
 
         hitSomething = deathOverlaps.Count > 0;
     }
@@ -94,10 +116,16 @@ public class BabyController : MonoBehaviour
 
     }
 
+    public void SwapDir()
+    {
+        crawlDir *= -1;
+        Debug.Log("Swap Dir");
+    }
+
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.yellow;
-        Gizmos.DrawWireCube(new Vector3(transform.position.x, transform.position.y + footHeight, 0), groundedSize);
+        Gizmos.DrawWireCube(new Vector3(transform.position.x, transform.position.y + footHeight - groundedSize.y/2, 0), groundedSize);
 
         Gizmos.color = Color.red;
         Gizmos.DrawWireCube(new Vector3(transform.position.x, transform.position.y + ((deathSize.y - 1) / 2) + 0.3f), deathSize);

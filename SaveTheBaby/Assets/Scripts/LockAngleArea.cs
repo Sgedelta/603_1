@@ -10,6 +10,7 @@ public class LockAngleArea : MonoBehaviour
             var limits = hinge.limits;
             limits.max = hinge.jointAngle;
             limits.min = hinge.jointAngle;
+            hinge.limits = limits;
         }
         hinge.useLimits = locked;
     }

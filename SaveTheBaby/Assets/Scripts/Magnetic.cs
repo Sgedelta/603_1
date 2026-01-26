@@ -14,6 +14,10 @@ public class Magnetic : MonoBehaviour
     {
         get
         {
+            if (GetComponent<ElectricSource>() != null)
+            {
+                return true;
+            }
             collisionList.Clear();
             electricCollider.Overlap(collisionList);
             return( (from collider in collisionList where (collider.gameObject.GetComponent<ElectricSource>() != null) select collider).ToList().Count > 0 );
