@@ -61,7 +61,7 @@ public class CraneRope : MonoBehaviour
         //Vector3 currentCenter = transform.localPosition;
         Vector3 scale = transform.localScale;
         scale.y = length;
-        ropeVisual.transform.localScale = new Vector3(width, length, width);
+        ropeVisual.transform.localScale = new Vector3(width * 5, length * 1.5f, width);
         ropeVisual.transform.localPosition = new Vector3(0, length / 2, 0);
         colider.offset = new Vector2(0, length / 2);
         colider.size = new Vector2(width, length);

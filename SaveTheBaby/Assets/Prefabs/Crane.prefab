@@ -221,6 +221,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ffbbe79fd99947438c2de9315b7f566, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  magOff: {fileID: -5969188919655387853, guid: c57710d4cc1a1674d9bfdb022860dd6f, type: 3}
+  magOn: {fileID: 1417096683842939211, guid: 966a2ad4f0cb5214b8d568ee22536477, type: 3}
   pivotObject: {fileID: 2704105521926277948}
   magnetObject: {fileID: 8536589646177981542}
   firstRope: {fileID: 5850165924382897082}
@@ -258,7 +260,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0.5, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.2625, y: 0.5375, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 6544838764403854730}
@@ -307,12 +309,12 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
-  m_Color: {r: 1, g: 0, b: 0, a: 1}
+  m_Sprite: {fileID: -5969188919655387853, guid: c57710d4cc1a1674d9bfdb022860dd6f, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
-  m_FlipY: 0
-  m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_FlipY: 1
+  m_DrawMode: 1
+  m_Size: {x: 1.3, y: 2}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -356,13 +358,13 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
-    newSize: {x: 1, y: 1}
+    oldSize: {x: 1.01, y: 0.43}
+    newSize: {x: 1.3, y: 2}
     adaptiveTilingThreshold: 0.5
-    drawMode: 0
+    drawMode: 1
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 1.3, y: 2}
   m_EdgeRadius: 0
 --- !u!1 &8536589646177981542
 GameObject:

@@ -12,6 +12,8 @@ public class CraneController : MonoBehaviour
         else instance = this;
     }
 
+    [SerializeField] Sprite magOff;
+    [SerializeField] Sprite magOn;
 
     InputAction moveAction;
     InputAction interactAction;
@@ -113,12 +115,12 @@ public class CraneController : MonoBehaviour
         if (magnetActive)
         {
             magnetActive = false;
-            magnetSprite.color = Color.red;
+            magnetSprite.sprite = magOff;
         }
         else
         {
             magnetActive = true;
-            magnetSprite.color = Color.green;
+            magnetSprite.sprite = magOn;
         }
     }
 

@@ -19,6 +19,7 @@ public class BabyController : MonoBehaviour
     private bool grounded = false;
     private bool hitSomething = false;
     private GameObject lastGoalHit = null;
+    private SpriteRenderer sr;
 
     [SerializeField] private float crawlSpeed = 1;
     [SerializeField] private int crawlDir = 1;
@@ -28,6 +29,7 @@ public class BabyController : MonoBehaviour
     {
         groundLayerMask = LayerMask.GetMask("Obstacle");
         goalLayerMask = LayerMask.GetMask("Goal");
+        sr = GetComponent<SpriteRenderer>();
     }
 
     // Update is called once per frame
@@ -120,6 +122,8 @@ public class BabyController : MonoBehaviour
     {
         crawlDir *= -1;
         Debug.Log("Swap Dir");
+        sr.flipX = !sr.flipX;
+        
     }
 
     private void OnDrawGizmos()
