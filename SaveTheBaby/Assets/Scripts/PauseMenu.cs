@@ -1,6 +1,7 @@
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class PauseMenu : MonoBehaviour
 {
@@ -43,6 +44,15 @@ public class PauseMenu : MonoBehaviour
     }
 
     /// <summary>
+    /// Loads main menu
+    /// </summary>
+    public void MainMenu()
+    {
+        Resume();
+        SceneManager.LoadScene(0);
+    }
+
+    /// <summary>
     /// Hover effect enter
     /// </summary>
     /// <param name="_transform">Rect Transform of button</param>
@@ -66,15 +76,19 @@ public class PauseMenu : MonoBehaviour
     /// <param name="_pauseMenu">Empty parent game object that has the pause menu</param>
     public void Pause()
     {
-        if (_pauseMenuUI.activeSelf) 
+        if (_pauseMenuUI != null) 
         {
-            Resume();
+            if (_pauseMenuUI.activeSelf)
+            {
+                Resume();
+            }
+            else
+            {
+                Time.timeScale = 0f;
+                _pauseMenuUI.SetActive(true);
+            }
         }
-        else
-        {
-            Time.timeScale = 0f;
-            _pauseMenuUI.SetActive(true);
-        }
+        
     }
 
     /// <summary>
