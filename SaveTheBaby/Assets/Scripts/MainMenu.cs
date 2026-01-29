@@ -15,6 +15,15 @@ public class MainMenu : MonoBehaviour
     {
         SceneManager.LoadScene(1);
     }
+
+    /// <summary>
+    /// Starts the game and resets baby position
+    /// </summary>
+    public void PlayFromStart()
+    {
+        Destroy(GameObject.Find("BabyLoader"));
+        StartGame();
+    }
     /// <summary>
     /// Closes the game both in editor and in build
     /// </summary>

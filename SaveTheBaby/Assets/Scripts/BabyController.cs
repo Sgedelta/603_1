@@ -22,6 +22,7 @@ public class BabyController : MonoBehaviour
     private bool hitSomething = false;
     private GameObject lastGoalHit = null;
     private SpriteRenderer sr;
+    bool babyAlive = true;
 
     [SerializeField] private float crawlSpeed = 1;
     [SerializeField] private int crawlDir = 1;
@@ -95,13 +96,18 @@ public class BabyController : MonoBehaviour
     private void CheckDeathCollision()
     {
 
-        List<Collider2D> deathOverlaps = (from obj in Physics2D.OverlapBoxAll(
-            new Vector2(transform.position.x, transform.position.y + ((deathSize.y - 1) / 2) + 0.3f),
-            deathSize, 0, groundLayerMask) where (!obj.isTrigger) select RecordDeathCause(obj, DeathType.Hit)).ToList<Collider2D>();
+        Vector2 deathBoxPos = new Vector2(0, ((deathSize.y - 1) / 2) + 0.3f);
+        float ang = transform.rotation.eulerAngles.z;
+        float cos = Mathf.Cos(Mathf.Deg2Rad * ang);
+        float sin = Mathf.Sin(Mathf.Deg2Rad * ang);
+        deathBoxPos = new Vector2(cos * deathBoxPos.x - sin * deathBoxPos.y, sin * deathBoxPos.x + cos * deathBoxPos.y);
+        deathBoxPos += (Vector2)transform.position;
+
+        List<Collider2D> deathOverlaps = (from obj in Physics2D.OverlapBoxAll( deathBoxPos,
+            deathSize, ang, groundLayerMask) where (!obj.isTrigger) select RecordDeathCause(obj, DeathType.Hit)).ToList<Collider2D>();
 
         deathOverlaps.AddRange(from obj in Physics2D.OverlapBoxAll(transform.position, electricDeathSize, 0) 
-                               where (obj.GetComponent<Magnetic>() != null && obj.GetComponent<Magnetic>().IsElectric) select RecordDeathCause(obj, DeathType.Electrify));
-
+                               where (obj.GetComponent<Magnetic>() != null && obj.GetComponent<Magnetic>().IsElectric) select RecordDeathCause(obj, DeathType.Hit));
 
         hitSomething = deathOverlaps.Count > 0;
     }
@@ -136,10 +142,17 @@ public class BabyController : MonoBehaviour
     //destroys the baby
     private void KillBaby()
     {
+        if(!babyAlive)
+        {
+            return;
+        }
+        babyAlive = false;
         Debug.Log("Baby Died!");
         crawlDir = 0;
         IEnumerator babyRoutine = ReloadSceneAfterDelay(5);
         StartCoroutine(babyRoutine);
+        GameObject.Find("AudioManager").GetComponent<AudioSource>().Play();
+
     }
 
 
@@ -161,6 +174,7 @@ public class BabyController : MonoBehaviour
 
     private void OnDrawGizmos()
     {
+
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireCube(new Vector3(transform.position.x, transform.position.y + footHeight - groundedSize.y/2, 0), groundedSize);
 
