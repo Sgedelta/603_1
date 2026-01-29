@@ -21,6 +21,7 @@ public class BabyController : MonoBehaviour
     private bool hitSomething = false;
     private GameObject lastGoalHit = null;
     private SpriteRenderer sr;
+    bool babyAlive = true;
 
     [SerializeField] private float crawlSpeed = 1;
     [SerializeField] private int crawlDir = 1;
@@ -118,10 +119,17 @@ public class BabyController : MonoBehaviour
     //destroys the baby
     private void KillBaby()
     {
+        if(!babyAlive)
+        {
+            return;
+        }
+        babyAlive = false;
         Debug.Log("Baby Died!");
         crawlDir = 0;
         IEnumerator babyRoutine = ReloadSceneAfterDelay(5);
         StartCoroutine(babyRoutine);
+        GameObject.Find("AudioManager").GetComponent<AudioSource>().Play();
+
     }
 
 
