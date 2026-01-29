@@ -92,7 +92,6 @@ public class CraneRope : MonoBehaviour
     {
         if (t > 0 && t < 1)
         {
-            Debug.Log("Split");
             Rigidbody2D childRigid = hinge.connectedBody;
             hinge.connectedBody = null;
             var newRopeGO = Instantiate(ropePrefab, transform.parent);

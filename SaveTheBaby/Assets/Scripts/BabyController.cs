@@ -6,6 +6,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
+using static BabyController;
 
 public class BabyController : MonoBehaviour
 {
@@ -24,6 +25,13 @@ public class BabyController : MonoBehaviour
 
     [SerializeField] private float crawlSpeed = 1;
     [SerializeField] private int crawlDir = 1;
+
+
+    public enum DeathType
+    {
+        Hit,
+        Electrify,
+    }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -86,16 +94,31 @@ public class BabyController : MonoBehaviour
 
     private void CheckDeathCollision()
     {
+
         List<Collider2D> deathOverlaps = (from obj in Physics2D.OverlapBoxAll(
             new Vector2(transform.position.x, transform.position.y + ((deathSize.y - 1) / 2) + 0.3f),
-            deathSize, 0, groundLayerMask) where (!obj.isTrigger) select obj).ToList<Collider2D>();
+            deathSize, 0, groundLayerMask) where (!obj.isTrigger) select RecordDeathCause(obj, DeathType.Hit)).ToList<Collider2D>();
 
         deathOverlaps.AddRange(from obj in Physics2D.OverlapBoxAll(transform.position, electricDeathSize, 0) 
-                               where (obj.GetComponent<Magnetic>() != null && obj.GetComponent<Magnetic>().IsElectric) select obj);
+                               where (obj.GetComponent<Magnetic>() != null && obj.GetComponent<Magnetic>().IsElectric) select RecordDeathCause(obj, DeathType.Electrify));
 
-        
 
         hitSomething = deathOverlaps.Count > 0;
+    }
+
+    private Collider2D RecordDeathCause(Collider2D collider,DeathType deathType)
+    {
+        var position = collider.ClosestPoint(transform.position);
+        switch (deathType)
+        {
+            case DeathType.Hit:
+                PopupMessage.Instance.ShowMessageHit(position);
+                break;
+            case DeathType.Electrify:
+                PopupMessage.Instance.ShowMessageElectrify(position);
+                break;
+        }
+        return collider;
     }
 
     private void CheckGoalCollision()
