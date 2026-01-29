@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.VisualScripting;
@@ -113,9 +114,18 @@ public class BabyController : MonoBehaviour
     private void KillBaby()
     {
         Debug.Log("Baby Died!");
-        Destroy(gameObject);
-        SceneManager.LoadScene(1); //for now just reload the scene...
+        crawlDir = 0;
+        IEnumerator babyRoutine = ReloadSceneAfterDelay(5);
+        StartCoroutine(babyRoutine);
+    }
 
+
+
+    private IEnumerator ReloadSceneAfterDelay(float time)
+    {
+        yield return new WaitForSeconds(time);
+        SceneManager.LoadScene(1);
+        yield return null;
     }
 
     public void SwapDir()
