@@ -95,6 +95,7 @@ public class BabyController : MonoBehaviour
 
     private void CheckDeathCollision()
     {
+        if (!babyAlive) return; //prevents spamming dying messages
 
         Vector2 deathBoxPos = new Vector2(0, ((deathSize.y - 1) / 2) + 0.3f);
         float ang = transform.rotation.eulerAngles.z;
@@ -104,16 +105,17 @@ public class BabyController : MonoBehaviour
         deathBoxPos += (Vector2)transform.position;
 
         List<Collider2D> deathOverlaps = (from obj in Physics2D.OverlapBoxAll( deathBoxPos,
-            deathSize, ang, groundLayerMask) where (!obj.isTrigger) select RecordDeathCause(obj, DeathType.Hit)).ToList<Collider2D>();
+            deathSize, ang, groundLayerMask) where (!obj.isTrigger) select ShowDeathCause(obj, DeathType.Hit)).ToList<Collider2D>();
 
         deathOverlaps.AddRange(from obj in Physics2D.OverlapBoxAll(transform.position, electricDeathSize, 0) 
-                               where (obj.GetComponent<Magnetic>() != null && obj.GetComponent<Magnetic>().IsElectric) select RecordDeathCause(obj, DeathType.Hit));
+                               where (obj.GetComponent<Magnetic>() != null && obj.GetComponent<Magnetic>().IsElectric) select ShowDeathCause(obj, DeathType.Electrify));
 
         hitSomething = deathOverlaps.Count > 0;
     }
 
-    private Collider2D RecordDeathCause(Collider2D collider,DeathType deathType)
+    private Collider2D ShowDeathCause(Collider2D collider, DeathType deathType)
     {
+        if (collider == null || PopupMessage.Instance == null) return null;
         var position = collider.ClosestPoint(transform.position);
         switch (deathType)
         {
